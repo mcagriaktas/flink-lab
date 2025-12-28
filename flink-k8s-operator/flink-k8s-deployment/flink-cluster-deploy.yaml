@@ -1,0 +1,137 @@
+apiVersion: flink.apache.org/v1beta1
+kind: FlinkDeployment
+metadata:
+  name: flink-cagri
+  namespace: flink
+spec:
+  image: mucagriaktas/flink-client:v1
+  flinkVersion: v2_0
+  # ----------------------------------------------------
+  # 1. Flink Configurations
+  # ----------------------------------------------------
+  flinkConfiguration:
+    # ----------------------------------------------------
+    # 1. AUTOSCALER CONFIGURATION (The Magic)
+    # ----------------------------------------------------
+    job.autoscaler.enabled: "true"                    # Enabled autoscale mode
+    job.autoscaler.stabilization.interval: "2m"       # Wait 2m before scaling again
+    job.autoscaler.metrics.window: "5m"               # Look at last 5m of data
+    job.autoscaler.target.utilization: "0.6"          # Target 60% load (leave buffer)
+    job.autoscaler.target.utilization.boundary: "0.2" # Scale if load > 80% or < 40%
+    job.autoscaler.restart.time: "2m"                 # Assumed restart time penalty
+    job.autoscaler.catch-up.duration: "5m"            # Plan to catch up lag in 5m
+
+    # ----------------------------------------------------
+    # 2. CHECKPOINTING TUNING (Production Values)
+    # ----------------------------------------------------
+    execution.checkpointing.interval: "10s"
+    execution.checkpointing.timeout: "10min"
+    execution.checkpointing.min-pause: "500ms"
+    execution.checkpointing.mode: "EXACTLY_ONCE"
+    execution.checkpointing.max-concurrent-checkpoints: "1"
+    execution.checkpointing.externalized-checkpoint-retention: "RETAIN_ON_CANCELLATION"
+
+    # ----------------------------------------------------
+    # 3. ADAPTIVE SCHEDULER
+    # ----------------------------------------------------
+    jobmanager.scheduler: adaptive
+    pipeline.max-parallelism: "36"
+
+    # ----------------------------------------------------
+    # 4. TASK SLOTS & MEMORY
+    # ----------------------------------------------------
+    taskmanager.numberOfTaskSlots: "2"
+    classloader.resolve-order: parent-first
+    state.backend: rocksdb
+
+    # ----------------------------------------------------
+    # 5. CHECKPOINTING & HA (Standard)
+    # ----------------------------------------------------
+    high-availability.type: kubernetes
+    state.checkpoints.dir: s3://flink-cagri/flink-state/checkpoints/flink-cagri/
+    state.savepoints.dir: s3://flink-cagri/flink-state/savepoints/flink-cagri/
+    high-availability.storageDir: s3://flink-cagri/ha
+
+    # ----------------------------------------------------
+    # 6. S3 / MINIO CONFIG
+    # ----------------------------------------------------
+    s3.endpoint: http://host.docker.internal:9000
+    s3.path.style.access: "true"
+    s3.access-key: cagri3541key3541
+    s3.secret-key: cagri3541access3541
+
+    # ----------------------------------------------------
+    # 7. METRICS CONFIGURATION
+    # ----------------------------------------------------
+    metrics.reporters: promgateway
+    metrics.reporter.promgateway.factory.class: org.apache.flink.metrics.prometheus.PrometheusPushGatewayReporterFactory
+    metrics.reporter.promgateway.hostUrl: http://host.docker.internal:9091
+    metrics.reporter.promgateway.jobName: flink-cagri-cluster
+    metrics.reporter.promgateway.randomJobNameSuffix: true
+    metrics.reporter.promgateway.deleteOnShutdown: true
+    metrics.reporter.promgateway.groupingKey: "cluster=flink-cagri;env=production"
+    metrics.reporter.promgateway.interval: 15s
+
+    # Include only metrics used in your Grafana dashboard
+    metrics.reporter.prometheus.filter.includes: >
+      *:downtime;*:uptime;*:numRestarts;*:taskSlotsAvailable;*:taskSlotsTotal;*.lastCheckpointFullSize.*;*.lastCheckpointDuration.*;
+      *.JVM.*;*.System.CPU:Usage;*.numberOfFailedCheckpoints.*;*.totalNumberOfCheckpoints.*;
+      *.job.task:numRecordsIn;*:numRecordsInErrors;*.job.task:numRecordsInPerSecond;
+      *.job.task.operator.KafkaSourceReader:*;
+      *.job.task.operator.KafkaSourceReader.KafkaConsumer:records-lag-max,records-consumed-rate,bytes-consumed-rate,fetch-latency-avg,last-poll-seconds-ago,connection-count;
+      *.job.task.operator.KafkaProducer:record-error-total,record-retry-total,record-send-rate,batch-size-avg,request-latency-avg,compression-rate-avg,connection-count,buffer-available-bytes,buffer-total-bytes,buffer-exhausted-total,metadata-wait-time-ns-total;
+
+    metrics.reporter.prometheus.filter.excludes: >
+      *:numRecordsOut;*:numRecordsOutErrors;*.UsageCPU*;*.Status.JVM.ClassLoader.*;
+
+    # ----------------------------------------------------
+    # 8. EXPOSE UI
+    # ----------------------------------------------------
+    kubernetes.rest-service.exposed.type: LoadBalancer
+
+  # ----------------------------------------------------
+  # 2. LOGGING CONFIGURATION
+  # ----------------------------------------------------
+  logConfiguration:
+    "log4j-console.properties": |
+      rootLogger.level = INFO
+      rootLogger.appenderRef.console.ref = ConsoleAppender
+      appender.console.name = ConsoleAppender
+      appender.console.type = CONSOLE
+      appender.console.layout.type = PatternLayout
+      appender.console.layout.pattern = %d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %-60c %x - %m%n
+      
+      logger.metricgroup.name = org.apache.flink.metrics.MetricGroup
+      logger.metricgroup.level = ERROR
+
+      logger.aws.name = com.amazonaws.util.VersionInfoUtils
+      logger.aws.level = OFF
+
+      logger.hadoop.name = org.apache.hadoop.util.NativeCodeLoader
+      logger.hadoop.level = ERROR
+
+  serviceAccount: flink
+
+  jobManager:
+    replicas: 1
+    resource:
+      memory: "2048m"
+      cpu: 1
+
+  taskManager:
+    resource:
+      memory: "2048m"
+      cpu: 1
+
+  job:
+
+    # JARS (JAVA - SCALA = API)
+    jarURI: local:///opt/flink/examples/streaming/flink-k8s-client-1.0.jar
+
+    # Python API
+    # jarURI: local:///opt/flink/opt/flink-python-2.0.1.jar
+    # entryClass: "org.apache.flink.client.python.PythonDriver"
+    # args: ["-py", "/opt/flink/examples/streaming/KafkaFlinkClient.py"]
+
+    parallelism: 2
+    upgradeMode: last-state

@@ -1,0 +1,143 @@
+services:
+  kafka1:
+    container_name: kafka1
+    hostname: kafka1
+    build:
+      context: ./images/kafka/.
+      dockerfile: Dockerfile
+    environment:
+      SINK_TOPIC: ${SINK_TOPIC}
+      SOURCE_TOPIC: ${SOURCE_TOPIC}
+    ports:
+      - '19092:19092'
+      - '19093:19093'
+    volumes:
+      - ./configs/kafka/kafka1/server.properties:/opt/kafka/config/server.properties
+      - ./logs/kafka/kafka1/data/:/opt/data/
+      - ./logs/kafka/kafka1/logs/:/opt/kafka/logs/
+    networks:
+      dahbest:
+        ipv4_address: 172.80.0.11
+
+  kafka2:
+    container_name: kafka2
+    hostname: kafka2
+    build:
+      context: ./images/kafka/.
+      dockerfile: Dockerfile
+    ports:
+      - '29092:29092'
+      - '29093:29093'
+    volumes:
+      - ./configs/kafka/kafka2/server.properties:/opt/kafka/config/server.properties
+      - ./logs/kafka/kafka2/data:/opt/data/
+      - ./logs/kafka/kafka2/logs/:/opt/kafka/logs/
+    networks:
+      dahbest:
+        ipv4_address: 172.80.0.12
+
+  kafka3:
+    container_name: kafka3
+    hostname: kafka3
+    build:
+      context: ./images/kafka/.
+      dockerfile: Dockerfile
+    ports:
+      - '39092:39092'
+      - '39093:39093'
+    volumes:
+      - ./configs/kafka/kafka3/server.properties:/opt/kafka/config/server.properties   
+      - ./logs/kafka/kafka3/data:/opt/data/
+      - ./logs/kafka/kafka3/logs/:/opt/kafka/logs/
+    networks:
+      dahbest:
+        ipv4_address: 172.80.0.13
+
+  kafka-ui:
+    container_name: kafka-ui
+    build:
+      context: ./images/provectus/.
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./configs/provectus/config.yml:/mnt/config.yml
+    networks:
+      dahbest:
+        ipv4_address: 172.80.0.14
+
+  minio:
+    hostname: minio
+    container_name: minio
+    build:
+      context: ./images/minio/.
+      dockerfile: Dockerfile
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION}
+      BUCKET_NAME: ${BUCKET_NAME}
+    ports:
+      - 9000:9000
+      - 9001:9001
+    volumes:
+      - ./configs/minio/:/mnt/
+      - ./logs/minio/:/data
+    networks:
+      dahbest:
+        ipv4_address: 172.80.0.15
+
+  grafana:
+    container_name: grafana
+    hostname: grafana
+    build:
+      context: ./images/grafana/
+      dockerfile: Dockerfile
+    environment:
+      ADMIN_USER: ${ADMIN_USER}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./configs/grafana/grafana.ini:/opt/grafana/confs/grafana.ini
+      - ./configs/grafana/provisioning/datasources/:/opt/grafana/provisioning/datasources/
+      - ./configs/grafana/provisioning/dashboards/:/opt/grafana/provisioning/dashboards/
+      - ./logs/grafana/logs:/opt/grafana/logs
+      - ./logs/grafana/data:/opt/grafana/data
+    networks:
+      dahbest:
+        ipv4_address: 172.80.0.16
+
+  prometheus:
+    container_name: prometheus
+    hostname: prometheus
+    build:
+      context: ./images/prometheus/.
+      dockerfile: Dockerfile
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./configs/prometheus/prometheus.yml:/opt/prometheus/prometheus.yml
+    networks:
+      dahbest:
+        ipv4_address: 172.80.0.17
+
+  pushgateway:
+    container_name: pushgateway
+    hostname: pushgateway
+    build:
+      context: ./images/pushgateway/.
+      dockerfile: Dockerfile
+    ports:
+      - "9091:9091"
+    volumes:
+      - ./logs/pushgateway/data:/opt/pushgateway/data
+    networks:
+      dahbest:
+        ipv4_address: 172.80.0.18
+
+networks:
+  dahbest:
+    external: true
