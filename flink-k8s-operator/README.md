@@ -4,7 +4,9 @@ Flink Kubernetes Operator with Flink 2.0.0 and S3 High Availability (HA) mode.
 
 Application Mode: Application Mode runs one job on the cluster. The cluster is only for this single job. In production, this makes things easier. When you open the Flink UI, you will see that you cannot cancel the job. This is because the Flink Kubernetes Operator will restart the pod automatically if there is any problem. For this reason, Application Mode is simple to use and easy to manage.
 
-<img width="407" height="394" alt="Untitled" src="https://github.com/user-attachments/assets/10050a45-8ae8-49ea-8835-3e5def85c4d6" />
+<p align="center">
+  <img width="407" height="394" alt="Untitled" src="https://github.com/user-attachments/assets/10050a45-8ae8-49ea-8835-3e5def85c4d6" />
+</p>
 
 ## Requirement:
 1. Docker-Desktop
