@@ -8,6 +8,8 @@ Application Mode: Application Mode runs one job on the cluster. The cluster is o
   <img width="407" height="394" alt="Untitled" src="https://github.com/user-attachments/assets/10050a45-8ae8-49ea-8835-3e5def85c4d6" />
 </p>
 
+Medium Article: https://medium.com/@mucagriaktas/high-availability-flink-on-kubernetes-with-s3-and-kafka-4-0-0-application-mode-99634399fdb1?postPublishedType=initial
+
 ## Requirements:
 1. Docker-Desktop
 2. Linux
