@@ -12,7 +12,8 @@ Medium Article: https://medium.com/@mucagriaktas/high-availability-flink-on-kube
 
 ## Requirements:
 1. Docker-Desktop
-2. Linux
+2. Enable Kubernetes in Docker Desktop
+3. Linux
 
 ### Pre-Request for Env.
 In this deployment we need to use S3 for our Flink HA, for this reaons we need to build a S3 Minio container, also there're alot of panel for Flink monitoring, for this reaons I added: 
