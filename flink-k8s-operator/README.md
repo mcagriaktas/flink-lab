@@ -80,7 +80,7 @@ cd ../..
 cp flink-client-jar/java/target/flink-k8s-client-1.0.jar flink-container-image/.
 
 cd flink-container-image && \
-imagename=v1 && \
+imagename=v8 && \
 dockerhub_username=mucagriaktas && \
 docker build -t flink-cagri:$imagename . && \
 docker tag flink-cagri:$imagename $dockerhub_username/flink-client:$imagename && \
@@ -123,4 +123,12 @@ NOT: If your kubernetes cluster is not allow autoscale, give the Flink service a
   - get
   - list
   - watch
+```
+
+3. Rollout the operator:
+```bash
+kubectl rollout restart deployment flink-kubernetes-operator -n flink
+
+# Wait a few seconds for the new pod to start, then:
+kubectl logs -f deployment/flink-kubernetes-operator -n flink
 ```

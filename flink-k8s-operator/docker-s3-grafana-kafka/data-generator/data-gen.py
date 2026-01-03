@@ -87,7 +87,7 @@ for i in range(10000000):
         print(f"Local buffer full, waiting...")
         producer.poll(1)
 
-    sleep(1) # Optional: comment this out if you want to test maximum throughput
+    sleep(0.01) # Optional: comment this out if you want to test maximum throughput
 
 producer.flush()
 print("Done!")

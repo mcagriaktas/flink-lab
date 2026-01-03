@@ -35,5 +35,8 @@ RUN wget -q https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-
 # install PyFlink
 RUN pip3 install apache-flink==2.0.1
 
-# User Own Jar File
-COPY ./flink-k8s-client-1.0.jar ${FLINK_USER_JAR_HOME}/flink-k8s-client-1.0.jar
+RUN wget https://github.com/DataSQRL/flink-sql-runner/releases/download/0.9.1/flink-sql-runner-0.9.1-flink-2.2.jar -P ${FLINK_OPT}
+COPY flink-sql-runner-1.14.jar ${FLINK_OPT}
+
+# User Own Jar-SQL File
+COPY ./FlinkKafkaClient.sql ${FLINK_USER_JAR_HOME}/FlinkKafkaClient.sql

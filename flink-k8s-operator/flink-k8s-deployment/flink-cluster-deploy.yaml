@@ -4,7 +4,7 @@ metadata:
   name: flink-cagri
   namespace: flink
 spec:
-  image: mucagriaktas/flink-client:v1
+  image: mucagriaktas/flink-client:v8
   flinkVersion: v2_0
   # ----------------------------------------------------
   # 1. Flink Configurations
@@ -124,9 +124,12 @@ spec:
       cpu: 1
 
   job:
+    # SQL API
+    jarURI: local:///opt/flink/opt/flink-sql-runner-1.14.jar
+    args: ["/opt/flink/examples/streaming/FlinkKafkaClient.sql"]
 
     # JARS (JAVA - SCALA = API)
-    jarURI: local:///opt/flink/examples/streaming/flink-k8s-client-1.0.jar
+    # jarURI: local:///opt/flink/examples/streaming/flink-k8s-client-1.0.jar
 
     # Python API
     # jarURI: local:///opt/flink/opt/flink-python-2.0.1.jar
