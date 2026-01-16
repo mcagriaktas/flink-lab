@@ -62,7 +62,8 @@ helm repo add flink-operator-repo https://downloads.apache.org/flink/flink-kuber
 helm install flink-kubernetes-operator \
   flink-operator-repo/flink-kubernetes-operator \
   --namespace flink \
-  --create-namespace
+  --create-namespace \
+  --set webhook.create=false
 ```
 
 3. Build the Image:
@@ -78,9 +79,14 @@ mvn clean package
 cd ../..
 
 cp flink-client-jar/java/target/flink-k8s-client-1.0.jar flink-container-image/.
+```
 
+Not: if you'll use Flink-Sql, you need to compline sql-runner.jar file! I putted the jar file in the `flink-container-image` folder:
+ - https://github.com/apache/flink-kubernetes-operator/tree/main/examples/flink-sql-runner-example
+
+```bash
 cd flink-container-image && \
-imagename=v8 && \
+imagename=v2 && \
 dockerhub_username=mucagriaktas && \
 docker build -t flink-cagri:$imagename . && \
 docker tag flink-cagri:$imagename $dockerhub_username/flink-client:$imagename && \

@@ -4,7 +4,7 @@ metadata:
   name: flink-cagri
   namespace: flink
 spec:
-  image: mucagriaktas/flink-client:v8
+  image: mucagriaktas/flink-client:v2
   flinkVersion: v2_0
   # ----------------------------------------------------
   # 1. Flink Configurations
