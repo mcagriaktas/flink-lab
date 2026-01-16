@@ -46,15 +46,7 @@ LINKKKKKK
 
 ### How to Start
 
-1. Install Cert-Manager:
-```bash
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.19.1/cert-manager.yaml
-
-# Wait for cert-manager to be ready
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/instance=cert-manager -n cert-manager --timeout=300s
-```
-
-2. Install Flink K8S Operator:
+1. Install Flink K8S Operator:
 ```bash
 helm repo add flink-operator-repo https://downloads.apache.org/flink/flink-kubernetes-operator-1.13.0/
 
@@ -66,7 +58,7 @@ helm install flink-kubernetes-operator \
   --set webhook.create=false
 ```
 
-3. Build the Image:
+2. Build the Image:
 ```bash
 # Scala Jar
 cd flink-client-jar/scala
@@ -94,20 +86,20 @@ docker push $dockerhub_username/flink-client:$imagename && \
 cd ..
 ```
 
-4. Install Flink Cluster (with your configs):
+3. Install Flink Cluster (with your configs):
 ```bash
 kubectl apply -f flink-k8s-deployment/flink-cluster-deploy.yaml
 
 kubectl wait --for=condition=ready pod -l app=flink-cagri -n flink --timeout=300s
 ```
 
-5. Start the data-get for testing:
+4. Start the data-get for testing:
 DO NOT FORGET, the data-get is creating every msg 1mb, it's might be overhelm your pc!
 ```bash
 python3 docker-s3-grafana-kafka/data-generator/data-gen.py
 ```
 
-6. Check Kafka-UI and Grafana dashboard:
+5. Check Kafka-UI and Grafana dashboard:
 ```bash
 http://localhost:8080 # Kafka UI
 http://localhost:3000 # Grafana Dashboard

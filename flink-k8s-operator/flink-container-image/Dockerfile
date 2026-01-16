@@ -1,5 +1,8 @@
 FROM apache/flink:2.0.1-java21
 
+# Time Zone Set (base GMT=0)
+ENV TZ=Europe/Istanbul
+
 # Flink Application Cluster Env.
 ENV FLINK_VERSION=2.0.1
 ENV SCALA_VERSION=2.12
