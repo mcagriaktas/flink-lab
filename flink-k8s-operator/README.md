@@ -40,10 +40,6 @@ docker compose up -d --build
 --> flink-k8s-deployment    : Flink K8S Operator yml
 ```
 
-### Some Detail Explanation (Medium Article)
-Firstly you can read the article firstly or follow build setup and explore!
-LINKKKKKK
-
 ### How to Start
 
 1. Install Flink K8S Operator:
